@@ -21,18 +21,18 @@ public class ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
 
-    public Item create(ItemDto itemDto, Integer ownerId) {
+    public ItemDto create(ItemDto itemDto, Integer ownerId) {
         ItemValidator.validate(itemDto, ownerId);
         Item item = ItemMapper.convert(itemDto, ownerId);
         ItemValidator.validate(item);
         UserIdValidator.validate(userService.getUsersId(), ownerId);
-        return itemStorage.create(item);
+        return ItemMapper.convert(itemStorage.create(item));
     }
 
-    public Item update(Integer itemId, Integer ownerId, ItemDto itemDto) {
+    public ItemDto update(Integer itemId, Integer ownerId, ItemDto itemDto) {
         ItemValidator.validate(itemDto, ownerId);
         UserIdValidator.validate(userService.getUsersId(), ownerId);
-        Item item = get(itemId);
+        Item item = itemStorage.get(itemId);
         if (!item.getOwnerId().equals(ownerId)) {
             throw new IncorrectId("Вы не можете редактировать описание чужих вещей.");
         }
@@ -45,22 +45,31 @@ public class ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return itemStorage.update(item);
+        return ItemMapper.convert(itemStorage.update(item));
     }
 
-    public Item get(int itemId) {
-        return itemStorage.get(itemId);
+    public ItemDto get(int itemId) {
+        return ItemMapper.convert(itemStorage.get(itemId));
     }
 
-    public List<Item> getAllByOwnerId(Integer ownerId) {
-        return itemStorage.getAllByOwnerId(ownerId);
+    public List<ItemDto> getAllByOwnerId(Integer ownerId) {
+        List<Item> items = itemStorage.getAllByOwnerId(ownerId);
+        List<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
+            itemDtos.add(ItemMapper.convert(item));
+        }
+        return itemDtos;
     }
 
-    public List<Item> searchItemsByText(String text) {
+    public List<ItemDto> searchItemsByText(String text) {
         List<Item> items = new ArrayList<>();
+        List<ItemDto> itemDtos = new ArrayList<>();
         if (text != null && !text.isEmpty()) {
             items = itemStorage.getAllWantedItem(text);
         }
-        return items;
+        for (Item item : items) {
+            itemDtos.add(ItemMapper.convert(item));
+        }
+        return itemDtos;
     }
 }

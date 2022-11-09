@@ -10,8 +10,6 @@ public interface ItemStorage {
 
     Item update(Item item);
 
-    Item delete(Item user);
-
     Item get(int userId);
 
     List<Item> getAll();

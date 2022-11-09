@@ -40,21 +40,14 @@ public class DBItemStorage implements ItemStorage {
             return statement;
         }, keyHolder);
         item.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-        return item;
+        return get(item.getId());
     }
 
     @Override
     public Item update(Item item) {
         String query = "UPDATE items SET name = ?, description = ?, available = ? WHERE id = ?;";
         jdbcTemplate.update(query, item.getName(), item.getDescription(), item.getAvailable(), item.getId());
-        return item;
-    }
-
-    @Override
-    public Item delete(Item item) {
-        String query = "DELETE items WHERE id = ?;";
-        jdbcTemplate.update(query, item.getId());
-        return item;
+        return get(item.getId());
     }
 
     @Override

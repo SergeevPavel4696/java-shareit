@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.validator.UserIdValidator;
 import ru.practicum.shareit.user.validator.UserValidator;
@@ -17,36 +18,41 @@ public class UserService {
 
     private final UserStorage userStorage;
 
-    public User create(User user) {
+    public UserDto create(UserDto userDto) {
+        User user = UserMapper.convert(userDto);
         UserValidator.validate(user, getUsersName(), getUsersEmail());
-        return userStorage.create(user);
+        return UserMapper.convert(userStorage.create(user));
     }
 
-    public User update(int userId, UserDto userDto) {
+    public UserDto update(int userId, UserDto userDto) {
         UserValidator.validate(userDto, getUsersName(), getUsersEmail());
         UserIdValidator.validate(getUsersId(), userId);
-        User user = get(userId);
+        User user = userStorage.get(userId);
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
         if (userDto.getEmail() != null) {
             user.setEmail(userDto.getEmail());
         }
-        return userStorage.update(user);
+        return UserMapper.convert(userStorage.update(user));
     }
 
-    public User delete(int userId) {
+    public UserDto delete(int userId) {
         UserIdValidator.validate(getUsersId(), userId);
-        return userStorage.delete(userId);
+        return UserMapper.convert(userStorage.delete(userId));
     }
 
-    public User get(int userId) {
+    public UserDto get(int userId) {
         UserIdValidator.validate(getUsersId(), userId);
-        return userStorage.get(userId);
+        return UserMapper.convert(userStorage.get(userId));
     }
 
-    public List<User> getAll() {
-        return userStorage.getAll();
+    public List<UserDto> getAll() {
+        List<UserDto> userDtos = new ArrayList<>();
+        for (User user : userStorage.getAll()) {
+            userDtos.add(UserMapper.convert(user));
+        }
+        return userDtos;
     }
 
     public List<Integer> getUsersId() {
