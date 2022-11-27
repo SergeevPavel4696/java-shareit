@@ -15,8 +15,4 @@ public class BookingMapper {
     public static Booking convert(BookingDto bookingDto, Item item, User booker, BookingStatus status) {
         return new Booking(bookingDto.getId(), bookingDto.getStart(), bookingDto.getEnd(), item, booker, status);
     }
-
-    public static Booking convert(BookingDto bookingDto, Item item, User booker) {
-        return new Booking(bookingDto.getId(), bookingDto.getStart(), bookingDto.getEnd(), item, booker, bookingDto.getStatus());
-    }
 }
