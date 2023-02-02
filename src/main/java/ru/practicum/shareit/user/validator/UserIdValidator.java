@@ -5,7 +5,7 @@ import ru.practicum.shareit.exceptions.IncorrectId;
 import java.util.List;
 
 public class UserIdValidator {
-    public static void validate(List<Integer> usersId, Integer userId) {
+    public static void validate(List<Integer> usersId, int userId) {
         if (!usersId.contains(userId)) {
             throw new IncorrectId("Пользователь по указанному id не существует.");
         }

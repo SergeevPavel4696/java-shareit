@@ -1,7 +1,9 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.Duplicate;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -22,7 +24,11 @@ public class UserService {
         UserValidator.validate(userDto);
         User user = UserMapper.convert(userDto);
         UserValidator.validate(user);
-        return UserMapper.convert(userJpaRepository.save(user));
+        try {
+            return UserMapper.convert(userJpaRepository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
+        }
     }
 
     public UserDto update(int userId, UserDto userDto) {
@@ -35,9 +41,12 @@ public class UserService {
         if (userDto.getEmail() != null) {
             user.setEmail(userDto.getEmail());
         }
-        user = userJpaRepository.save(user);
-        userDto = UserMapper.convert(user);
-        return userDto;
+        try {
+            user = userJpaRepository.save(user);
+            return UserMapper.convert(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
+        }
     }
 
     public UserDto delete(int userId) {

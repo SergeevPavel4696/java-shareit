@@ -29,11 +29,11 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column
+    @Column(name = "name")
     private String name;
-    @Column
+    @Column(name = "description")
     private String description;
-    @Column
+    @Column(name = "available")
     private Boolean available;
     @ManyToOne
     @JoinColumn(name = "owner_id")

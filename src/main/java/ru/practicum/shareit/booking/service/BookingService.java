@@ -43,8 +43,7 @@ public class BookingService {
         BookingValidator.validate(booking);
         BookingValidator.isYourItem(booking, bookerId);
         BookingValidator.validateItem(item);
-        booking = bookingJpaRepository.save(booking);
-        return booking;
+        return bookingJpaRepository.save(booking);
     }
 
     public Booking reactToBooking(int bookingId, Boolean approved, int ownerId) {

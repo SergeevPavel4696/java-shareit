@@ -1,11 +1,13 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
+import ru.practicum.shareit.exceptions.Duplicate;
 import ru.practicum.shareit.exceptions.IncorrectId;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -48,8 +50,11 @@ public class ItemService {
         ItemValidator.validate(item);
         UserIdValidator.validate(userService.getUsersId(), ownerId);
         item = itemJpaRepository.save(item);
-        itemDto = ItemMapper.convert(item);
-        return itemDto;
+        try {
+            return ItemMapper.convert(item);
+        } catch (DataIntegrityViolationException e) {
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
+        }
     }
 
     public ItemDto update(int itemId, Integer ownerId, ItemDto itemDto) {
@@ -69,9 +74,12 @@ public class ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        item = itemJpaRepository.save(item);
-        itemDto = ItemMapper.convert(item);
-        return itemDto;
+        try {
+            item = itemJpaRepository.save(item);
+            return ItemMapper.convert(item);
+        } catch (DataIntegrityViolationException e) {
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
+        }
     }
 
     public ItemWithBooking get(int itemId, int ownerId) {
