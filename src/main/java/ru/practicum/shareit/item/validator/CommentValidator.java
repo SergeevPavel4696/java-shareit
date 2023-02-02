@@ -13,7 +13,7 @@ public class CommentValidator {
         if (comment.getItem() == null) {
             throw new ValidationException("Комментируемая вещь обязательна.");
         }
-        if (comment.getAuthorName() == null) {
+        if (comment.getAuthor() == null) {
             throw new ValidationException("Комментатор вещи обязателен.");
         }
     }

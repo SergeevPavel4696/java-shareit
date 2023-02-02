@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,5 +35,6 @@ public class Comment {
     @JoinColumn(name = "item_id")
     private Item item;
     @JoinColumn(name = "author_id")
-    private String authorName;
+    @ManyToOne
+    private User author;
 }

@@ -27,7 +27,7 @@ public class UserService {
         try {
             return UserMapper.convert(userJpaRepository.save(user));
         } catch (DataIntegrityViolationException e) {
-            throw new Duplicate("Пользователь с указанными данными уже существует.");
+            throw new Duplicate("Вещь с указанными данными уже существует.");
         }
     }
 
@@ -45,7 +45,7 @@ public class UserService {
             user = userJpaRepository.save(user);
             return UserMapper.convert(user);
         } catch (DataIntegrityViolationException e) {
-            throw new Duplicate("Пользователь с указанными данными уже существует.");
+            throw new Duplicate("Вещь с указанными данными уже существует.");
         }
     }
 

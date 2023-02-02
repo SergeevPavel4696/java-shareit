@@ -144,7 +144,7 @@ public class ItemService {
         return new ArrayList<>();
     }
 
-    public Comment addComment(CommentDto commentDto, int itemId, int authorId) {
+    public CommentDto addComment(CommentDto commentDto, int itemId, int authorId) {
         if (bookingJpaRepository.findAll().stream().noneMatch(booking -> booking.getBooker().getId() == authorId
                 && booking.getItem().getId() == itemId
                 && booking.getStatus() == APPROVED)) {
@@ -161,15 +161,25 @@ public class ItemService {
         Comment comment = CommentMapper.convert(commentDto, item, booker);
         CommentValidator.validate(comment);
         commentJpaRepository.save(comment);
-        return comment;
+        return CommentMapper.convert(comment);
     }
 
     public List<Integer> getItemsId() {
         return itemJpaRepository.findAll().stream().map(Item::getId).collect(Collectors.toList());
     }
 
-    public List<Comment> getCommentsByItemId(int itemId) {
+    /*public List<Comment> getCommentsByItemId(int itemId) {
         return commentJpaRepository.findAll().stream()
                 .filter(comment -> comment.getItem().getId() == itemId).collect(Collectors.toList());
+    }*/
+
+    public List<CommentDto> getCommentsByItemId(int itemId) {
+        List<Comment> qwe = commentJpaRepository.findAll().stream()
+                .filter(comment -> comment.getItem().getId() == itemId).collect(Collectors.toList());
+        List<CommentDto> ewq = new ArrayList<>();
+        for (Comment cd: qwe) {
+            ewq.add(CommentMapper.convert(cd));
+        }
+        return ewq;
     }
 }

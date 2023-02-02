@@ -7,6 +7,10 @@ import ru.practicum.shareit.user.model.User;
 
 public class CommentMapper {
     public static Comment convert(CommentDto commentDto, Item item, User author) {
-        return new Comment(commentDto.getId(), commentDto.getText(), item, author.getName());
+        return new Comment(commentDto.getId(), commentDto.getText(), item, author);
+    }
+
+    public static CommentDto convert(Comment comment) {
+        return new CommentDto(comment.getId(), comment.getText(), comment.getItem().getId(), comment.getAuthor().getName());
     }
 }

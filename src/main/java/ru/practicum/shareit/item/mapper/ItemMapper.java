@@ -15,7 +15,7 @@ public class ItemMapper {
         return new Item(itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getAvailable(), owner);
     }
 
-    public static ItemWithBooking convert(Item item, BookingDto lastBooking, BookingDto nextBooking, List<Comment> comments) {
+    public static ItemWithBooking convert(Item item, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
         return new ItemWithBooking(item.getId(), item.getName(), item.getDescription(),
                 item.getAvailable(), lastBooking, nextBooking, comments);
     }
