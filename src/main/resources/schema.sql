@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS items (
     name VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
     available BOOLEAN NOT NULL,
-    owner_id INTEGER REFERENCES items(id) ON DELETE CASCADE
+    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
