@@ -38,13 +38,13 @@ public class Booking {
     private LocalDateTime start;
     @Column(name = "booking_end")
     private LocalDateTime end;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
     @ManyToOne
     @JoinColumn(name = "booker_id")
     private User booker;
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status",  nullable = false)
     private BookingStatus status;
 }

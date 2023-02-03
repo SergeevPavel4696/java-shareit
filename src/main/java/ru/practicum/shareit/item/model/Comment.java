@@ -34,7 +34,7 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
-    @JoinColumn(name = "author_id")
     @ManyToOne
+    @JoinColumn(name = "author_id")
     private User author;
 }

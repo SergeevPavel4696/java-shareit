@@ -1,13 +1,16 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingDto;
+import ru.practicum.shareit.booking.model.BookingEntry;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.booking.validator.BookingIdValidator;
 import ru.practicum.shareit.booking.validator.BookingValidator;
+import ru.practicum.shareit.exceptions.Duplicate;
 import ru.practicum.shareit.exceptions.IncorrectBookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
@@ -33,20 +36,24 @@ public class BookingService {
     private final ItemService itemService;
     private final BookingJpaRepository bookingJpaRepository;
 
-    public Booking create(BookingDto bookingDto, int bookerId) {
-        BookingValidator.validate(bookingDto, bookerId);
-        ItemIdValidator.validate(itemService.getItemsId(), bookingDto.getItemId());
+    public BookingDto create(BookingEntry bookingEntry, int bookerId) {
+        BookingValidator.validate(bookingEntry, bookerId);
+        ItemIdValidator.validate(itemService.getItemsId(), bookingEntry.getItemId());
         UserIdValidator.validate(userService.getUsersId(), bookerId);
-        Item item = itemService.getItem(bookingDto.getItemId());
+        Item item = itemService.getItem(bookingEntry.getItemId());
         User booker = userService.getUser(bookerId);
-        Booking booking = BookingMapper.convert(bookingDto, item, booker, WAITING);
+        Booking booking = BookingMapper.convert(bookingEntry, item, booker, WAITING);
         BookingValidator.validate(booking);
         BookingValidator.isYourItem(booking, bookerId);
         BookingValidator.validateItem(item);
-        return bookingJpaRepository.save(booking);
+        try {
+            return BookingMapper.convertToDto(bookingJpaRepository.save(booking));
+        } catch (DataIntegrityViolationException e) {
+            throw new Duplicate("Вещь с указанными данными уже существует.");
+        }
     }
 
-    public Booking reactToBooking(int bookingId, Boolean approved, int ownerId) {
+    public BookingDto reactToBooking(int bookingId, Boolean approved, int ownerId) {
         BookingIdValidator.validate(getBookingsId(), bookingId);
         BookingValidator.validateApproved(approved);
         UserIdValidator.validate(userService.getUsersId(), ownerId);
@@ -61,37 +68,40 @@ public class BookingService {
             bookingJpaRepository.save(new Booking(booking.getId(), booking.getStart(),
                     booking.getEnd(), booking.getItem(), booking.getBooker(), REJECTED));
         }
-        return bookingJpaRepository.findById(bookingId);
+        return BookingMapper.convertToDto(bookingJpaRepository.findById(bookingId));
     }
 
-    public Booking get(int bookingId, int userId) {
+    public BookingDto get(int bookingId, int userId) {
         BookingIdValidator.validate(getBookingsId(), bookingId);
         UserIdValidator.validate(userService.getUsersId(), userId);
         Booking booking = bookingJpaRepository.findById(bookingId);
         BookingValidator.isElsesBooking(booking, userId);
-        return booking;
+        return BookingMapper.convertToDto(booking);
     }
 
-    public List<Booking> getAllOfBooker(int bookerId, String state) {
+    public List<BookingDto> getAllOfBooker(int bookerId, String state) {
         UserIdValidator.validate(userService.getUsersId(), bookerId);
-        List<Booking> bookings = bookingJpaRepository
+        List<BookingDto> bookings = bookingJpaRepository
                 .findAll()
                 .stream()
                 .filter(booking -> booking.getBooker().getId() == bookerId)
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .map(BookingMapper::convertToDto)
                 .collect(Collectors.toList());
         return getBookings(state, bookings);
     }
 
-    public List<Booking> getAllOfOwner(int ownerId, String state) {
+    public List<BookingDto> getAllOfOwner(int ownerId, String state) {
         UserIdValidator.validate(userService.getUsersId(), ownerId);
-        List<Booking> bookings = bookingJpaRepository.findAll().stream()
+        List<BookingDto> bookings = bookingJpaRepository.findAll().stream()
                 .filter(booking -> booking.getItem().getOwner().getId() == ownerId)
-                .sorted(Comparator.comparing(Booking::getStart).reversed()).collect(Collectors.toList());
+                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .map(BookingMapper::convertToDto)
+                .collect(Collectors.toList());
         return getBookings(state, bookings);
     }
 
-    private List<Booking> getBookings(String state, List<Booking> bookings) {
+    private List<BookingDto> getBookings(String state, List<BookingDto> bookings) {
         switch (state) {
             case "ALL":
                 return bookings;

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.validator;
 
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingDto;
+import ru.practicum.shareit.booking.model.BookingEntry;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exceptions.IncorrectId;
 import ru.practicum.shareit.exceptions.ServerError;
@@ -68,23 +68,23 @@ public class BookingValidator {
         }
     }
 
-    public static void validate(BookingDto bookingDto, Integer bookerId) {
+    public static void validate(BookingEntry bookingEntry, Integer bookerId) {
         if (bookerId == null) {
             throw new ServerError("Неопределён арендатор вещи.");
         }
-        if (bookingDto.getStart() == null) {
+        if (bookingEntry.getStart() == null) {
             throw new ValidationException("Время начала аренды вещи обязательное.");
         }
-        if (bookingDto.getEnd() == null) {
+        if (bookingEntry.getEnd() == null) {
             throw new ValidationException("Время конца аренды вещи обязательное.");
         }
-        if (bookingDto.getItemId() == null) {
+        if (bookingEntry.getItemId() == null) {
             throw new ValidationException("Арендуемая вещь обязательна.");
         }
-        if (bookingDto.getEnd().isBefore(LocalDateTime.now()) || bookingDto.getStart().isBefore(LocalDateTime.now())) {
+        if (bookingEntry.getEnd().isBefore(LocalDateTime.now()) || bookingEntry.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Время бронирования уже прошло.");
         }
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+        if (bookingEntry.getStart().isAfter(bookingEntry.getEnd())) {
             throw new ValidationException("Некорректные время начала и конца бронирования.");
         }
     }

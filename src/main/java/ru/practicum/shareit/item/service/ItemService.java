@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingDto;
+import ru.practicum.shareit.booking.model.BookingEntry;
 import ru.practicum.shareit.booking.repository.BookingJpaRepository;
 import ru.practicum.shareit.exceptions.Duplicate;
 import ru.practicum.shareit.exceptions.IncorrectId;
@@ -49,9 +49,8 @@ public class ItemService {
         Item item = ItemMapper.convert(itemDto, owner);
         ItemValidator.validate(item);
         UserIdValidator.validate(userService.getUsersId(), ownerId);
-        item = itemJpaRepository.save(item);
         try {
-            return ItemMapper.convert(item);
+            return ItemMapper.convert(itemJpaRepository.save(item));
         } catch (DataIntegrityViolationException e) {
             throw new Duplicate("Пользователь с указанными данными уже существует.");
         }
@@ -104,15 +103,15 @@ public class ItemService {
         List<Item> items = itemJpaRepository.findAllByOwner(owner);
         List<ItemWithBooking> itemDtos = new ArrayList<>();
         for (Item item : items) {
-            BookingDto lastBooking = getLastBookingForItem(item.getId());
-            BookingDto nextBooking = getNextBookingForItem(item.getId());
+            BookingEntry lastBooking = getLastBookingForItem(item.getId());
+            BookingEntry nextBooking = getNextBookingForItem(item.getId());
             ItemWithBooking itemWithBooking = ItemMapper.convert(item, lastBooking, nextBooking, getCommentsByItemId(item.getId()));
             itemDtos.add(itemWithBooking);
         }
         return itemDtos;
     }
 
-    private BookingDto getNextBookingForItem(int itemId) {
+    private BookingEntry getNextBookingForItem(int itemId) {
         List<Booking> nextBookings = bookingJpaRepository.findAll().stream()
                 .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()) && booking.getItem().getId() == itemId)
                 .sorted(Comparator.comparing(Booking::getStart))
@@ -124,7 +123,7 @@ public class ItemService {
         }
     }
 
-    private BookingDto getLastBookingForItem(int itemId) {
+    private BookingEntry getLastBookingForItem(int itemId) {
         List<Booking> lastBookings = bookingJpaRepository.findAll().stream()
                 .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()) && booking.getItem().getId() == itemId)
                 .sorted(Comparator.comparing(Booking::getStart).reversed())
@@ -151,8 +150,7 @@ public class ItemService {
             throw new ValidationException("Вы не можете комментировать не одобренную к бронированию вещь.");
         }
         if (bookingJpaRepository.findAll().stream().noneMatch(booking -> booking.getBooker().getId() == authorId
-                && booking.getItem().getId() == itemId
-                && booking.getStart().isBefore(LocalDateTime.now()))) {
+                && booking.getItem().getId() == itemId && booking.getStart().isBefore(LocalDateTime.now()))) {
             throw new ValidationException("Вы не можете комментировать вещь, которой ещё не пользовались.");
         }
         CommentValidator.validate(commentDto, authorId);
@@ -168,18 +166,8 @@ public class ItemService {
         return itemJpaRepository.findAll().stream().map(Item::getId).collect(Collectors.toList());
     }
 
-    /*public List<Comment> getCommentsByItemId(int itemId) {
-        return commentJpaRepository.findAll().stream()
-                .filter(comment -> comment.getItem().getId() == itemId).collect(Collectors.toList());
-    }*/
-
     public List<CommentDto> getCommentsByItemId(int itemId) {
-        List<Comment> qwe = commentJpaRepository.findAll().stream()
-                .filter(comment -> comment.getItem().getId() == itemId).collect(Collectors.toList());
-        List<CommentDto> ewq = new ArrayList<>();
-        for (Comment cd: qwe) {
-            ewq.add(CommentMapper.convert(cd));
-        }
-        return ewq;
+        return commentJpaRepository.findAll().stream().filter(comment -> comment.getItem().getId() == itemId)
+                .map(CommentMapper::convert).collect(Collectors.toList());
     }
 }
