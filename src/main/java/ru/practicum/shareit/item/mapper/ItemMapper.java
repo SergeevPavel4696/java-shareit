@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.mapper;
 
-import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.model.BookingEntry;
-import ru.practicum.shareit.item.model.*;
+import ru.practicum.shareit.item.model.CommentDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemDto;
+import ru.practicum.shareit.item.model.ItemWithBooking;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
