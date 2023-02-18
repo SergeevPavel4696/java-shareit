@@ -29,7 +29,7 @@ public class CommentMapperTest {
     private final CommentDto commentDto = new CommentDto(commentId, text, itemId, authorName);
 
     @Test
-    public void CommentToCommentDtoTest() {
+    public void commentToCommentDtoTest() {
         CommentDto commentDto = CommentMapper.convert(comment);
         assertEquals(commentId, commentDto.getId());
         assertEquals(text, commentDto.getText());
@@ -38,7 +38,7 @@ public class CommentMapperTest {
     }
 
     @Test
-    public void CommentDtoToCommentTest() {
+    public void commentDtoToCommentTest() {
         Comment comment = CommentMapper.convert(commentDto, item, author);
         assertEquals(commentId, comment.getId());
         assertEquals(text, comment.getText());
