@@ -63,7 +63,7 @@ public class ItemRequestServiceTest {
         user2Dto = UserMapper.convert(user2);
         item = new Item(1, "Название", "Описание", true, user1, 1);
         itemDto = ItemMapper.convert(item);
-        LocalDateTime date = LocalDateTime.of(2025, 1, 1, 0, 0,0);
+        LocalDateTime date = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
         itemRequest = new ItemRequest(1, "Описание", user2, date);
         itemRequestDto = ItemRequestMapper.convert(itemRequest);
     }

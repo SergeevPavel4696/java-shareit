@@ -23,7 +23,6 @@ import ru.practicum.shareit.item.validator.CommentValidator;
 import ru.practicum.shareit.item.validator.ItemIdValidator;
 import ru.practicum.shareit.item.validator.ItemValidator;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.validator.ItemRequestIdValidator;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.validator.UserIdValidator;
@@ -48,10 +47,10 @@ public class ItemService {
 
     public ItemDto create(ItemDto itemDto, Integer ownerId) {
         ItemValidator.validate(itemDto, ownerId);
+        UserIdValidator.validate(userService.get(ownerId));
         User owner = userService.getUser(ownerId);
         Item item = ItemMapper.convert(itemDto, owner);
         ItemValidator.validate(item);
-        UserIdValidator.validate(userService.getUsersId(), ownerId);
         try {
             return ItemMapper.convert(itemJpaRepository.save(item));
         } catch (DataIntegrityViolationException e) {
@@ -60,9 +59,9 @@ public class ItemService {
     }
 
     public ItemDto update(int itemId, Integer ownerId, ItemDto itemDto) {
-        ItemIdValidator.validate(getItemsId(), itemId);
+        ItemIdValidator.validate(getItem(itemId));
         ItemValidator.validate(itemDto, ownerId);
-        UserIdValidator.validate(userService.getUsersId(), ownerId);
+        UserIdValidator.validate(userService.get(ownerId));
         Item item = itemJpaRepository.findById(itemId);
         if (!item.getOwner().getId().equals(ownerId)) {
             throw new IncorrectId("Вы не можете редактировать описание чужих вещей.");
@@ -85,9 +84,9 @@ public class ItemService {
     }
 
     public ItemDtoWithBooking get(int itemId, int ownerId) {
-        ItemIdValidator.validate(getItemsId(), itemId);
+        ItemIdValidator.validate(getItem(itemId));
         Item item = itemJpaRepository.findById(itemId);
-        ItemDtoWithBooking itemWithBooking =ItemMapper.convert(item, getLastBookingForItem(itemId), getNextBookingForItem(itemId), getCommentsByItemId(itemId));
+        ItemDtoWithBooking itemWithBooking = ItemMapper.convert(item, getLastBookingForItem(itemId), getNextBookingForItem(itemId), getCommentsByItemId(itemId));
         if (item.getOwner().getId() != ownerId) {
             itemWithBooking.setLastBooking(null);
             itemWithBooking.setNextBooking(null);
@@ -96,12 +95,13 @@ public class ItemService {
     }
 
     public Item getItem(int itemId) {
-        ItemIdValidator.validate(getItemsId(), itemId);
-        return itemJpaRepository.findById(itemId);
+        Item item = itemJpaRepository.findById(itemId);
+        ItemIdValidator.validate(item);
+        return item;
     }
 
     public List<ItemDtoWithBooking> getAllByOwnerId(Integer ownerId, Integer from, Integer size) {
-        UserIdValidator.validate(userService.getUsersId(), ownerId);
+        UserIdValidator.validate(userService.get(ownerId));
         User owner = userService.getUser(ownerId);
         List<Item> items = itemJpaRepository.findAllByOwner(owner, PageableMaker.makePage(from, size));
         List<ItemDtoWithBooking> itemDtos = new ArrayList<>();
@@ -165,18 +165,13 @@ public class ItemService {
         return CommentMapper.convert(comment);
     }
 
-    public List<Integer> getItemsId() {
-        return itemJpaRepository.findAll().stream().map(Item::getId).collect(Collectors.toList());
-    }
-
     public List<CommentDto> getCommentsByItemId(int itemId) {
         return commentJpaRepository.findAll().stream().filter(comment -> comment.getItem().getId() == itemId)
                 .map(CommentMapper::convert).collect(Collectors.toList());
     }
 
-    public List<ItemDto> getAllByItemRequestId(List<Integer> getItemRequestsId, ItemRequest itemRequest) {
-        ItemRequestIdValidator.validate(getItemRequestsId, itemRequest.getId());
-        return itemJpaRepository.findAllByRequestId(itemRequest.getId())
+    public List<ItemDto> getAllByItemRequestId(Integer itemRequestId) {
+        return itemJpaRepository.findAllByRequestId(itemRequestId)
                 .stream().map(ItemMapper::convert).collect(Collectors.toList());
     }
 }

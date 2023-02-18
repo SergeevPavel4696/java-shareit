@@ -1,13 +1,12 @@
 package ru.practicum.shareit.request.validator;
 
 import ru.practicum.shareit.exceptions.IncorrectId;
-
-import java.util.List;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 public class ItemRequestIdValidator {
-    public static void validate(List<Integer> itemRequestsId, Integer itemRequestId) {
-        if (!itemRequestsId.contains(itemRequestId)) {
-            throw new IncorrectId("Вещь по указанному id не существует.");
+    public static void validate(ItemRequest itemRequest) {
+        if (itemRequest == null) {
+            throw new IncorrectId("Запрос по указанному id не существует.");
         }
     }
 }

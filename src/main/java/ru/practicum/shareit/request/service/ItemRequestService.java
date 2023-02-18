@@ -21,7 +21,6 @@ import ru.practicum.shareit.util.PageableMaker;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class ItemRequestService {
     public ItemRequestDtoResponse create(ItemRequestDto itemRequestDto, Integer requesterId) {
         ItemRequestValidator.validate(itemRequestDto, requesterId);
         User requester = userService.getUser(requesterId);
-        UserIdValidator.validate(userService.getUsersId(), requesterId);
+        UserIdValidator.validate(userService.get(requesterId));
         ItemRequest itemRequest = ItemRequestMapper.convert(itemRequestDto, requester, LocalDateTime.now());
         ItemRequestValidator.validate(itemRequest);
         try {
@@ -45,36 +44,31 @@ public class ItemRequestService {
     }
 
     public ItemRequestDtoWithItems get(int itemRequestId, int userId) {
-        ItemRequestIdValidator.validate(getItemRequestsId(), itemRequestId);
-        UserIdValidator.validate(userService.getUsersId(), userId);
+        ItemRequestIdValidator.validate(getItemRequest(itemRequestId));
+        UserIdValidator.validate(userService.get(userId));
         ItemRequest itemRequest = itemRequestJpaRepository.findById(itemRequestId);
-        return ItemRequestMapper.convert(itemRequest, itemService.getAllByItemRequestId(getItemRequestsId(), getItemRequest(itemRequestId)));
+        return ItemRequestMapper.convert(itemRequest, itemService.getAllByItemRequestId(itemRequestId));
     }
 
     public ItemRequest getItemRequest(int itemRequestId) {
-        ItemRequestIdValidator.validate(getItemRequestsId(), itemRequestId);
-        return itemRequestJpaRepository.findById(itemRequestId);
+        ItemRequest itemRequest = itemRequestJpaRepository.findById(itemRequestId);
+        ItemRequestIdValidator.validate(itemRequest);
+        return itemRequest;
     }
 
     public List<ItemRequestDtoWithItems> getAllByRequesterId(Integer requesterId) {
-        UserIdValidator.validate(userService.getUsersId(), requesterId);
+        UserIdValidator.validate(userService.get(requesterId));
         List<ItemRequest> itemRequests = itemRequestJpaRepository.findAllByRequesterId(requesterId);
         List<ItemRequestDtoWithItems> itemRequestDtoWithItems = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             itemRequestDtoWithItems.add(ItemRequestMapper
-                    .convert(itemRequest, itemService.getAllByItemRequestId(getItemRequestsId(), itemRequest)));
+                    .convert(itemRequest, itemService.getAllByItemRequestId(itemRequest.getId())));
         }
         return itemRequestDtoWithItems;
     }
 
     public List<ItemRequestDtoWithItems> getAllByOtherRequester(Integer myId, Integer from, Integer size) {
-        UserIdValidator.validate(userService.getUsersId(), myId);
-
-        /*List<ItemRequest> itemRequests = itemRequestJpaRepository.findAll().stream()
-                .filter(itemRequest -> !itemRequest.getRequester().getId().equals(myId))
-                .sorted(Comparator.comparingInt(o -> o.getCreated().getSecond()))
-                .collect(Collectors.toList());*/
-
+        UserIdValidator.validate(userService.get(myId));
         List<ItemRequest> itemRequests;
         try {
             itemRequests = itemRequestJpaRepository.findAllByRequesterIdNotOrderByCreatedDesc(myId, PageableMaker.makePage(from, size));
@@ -85,12 +79,8 @@ public class ItemRequestService {
         List<ItemRequestDtoWithItems> itemRequestDtoWithItems = new ArrayList<>();
         for (ItemRequest itemRequest : itemRequests) {
             itemRequestDtoWithItems.add(ItemRequestMapper
-                    .convert(itemRequest, itemService.getAllByItemRequestId(getItemRequestsId(), itemRequest)));
+                    .convert(itemRequest, itemService.getAllByItemRequestId(itemRequest.getId())));
         }
         return itemRequestDtoWithItems;
-    }
-
-    public List<Integer> getItemRequestsId() {
-        return itemRequestJpaRepository.findAll().stream().map(ItemRequest::getId).collect(Collectors.toList());
     }
 }

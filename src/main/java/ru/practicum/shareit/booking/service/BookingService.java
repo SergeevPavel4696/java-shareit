@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.validator.UserIdValidator;
 import ru.practicum.shareit.util.PageableMaker;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,12 +38,11 @@ public class BookingService {
 
     public BookingDto create(BookingEntry bookingEntry, int bookerId) {
         BookingValidator.validate(bookingEntry, bookerId);
-        ItemIdValidator.validate(itemService.getItemsId(), bookingEntry.getItemId());
-        UserIdValidator.validate(userService.getUsersId(), bookerId);
+        ItemIdValidator.validate(itemService.getItem(bookingEntry.getItemId()));
+        UserIdValidator.validate(userService.get(bookerId));
         Item item = itemService.getItem(bookingEntry.getItemId());
         User booker = userService.getUser(bookerId);
         Booking booking = BookingMapper.convert(bookingEntry, item, booker, WAITING);
-        BookingValidator.validate(booking);
         BookingValidator.isYourItem(booking, bookerId);
         BookingValidator.validateItem(item);
         try {
@@ -55,9 +53,9 @@ public class BookingService {
     }
 
     public BookingDto reactToBooking(int bookingId, Boolean approved, int ownerId) {
-        BookingIdValidator.validate(getBookingsId(), bookingId);
+        BookingIdValidator.validate(getBooking(bookingId));
         BookingValidator.validateApproved(approved);
-        UserIdValidator.validate(userService.getUsersId(), ownerId);
+        UserIdValidator.validate(userService.get(ownerId));
         Booking booking = bookingJpaRepository.findById(bookingId);
         BookingValidator.validateApproved(approved, booking);
         BookingValidator.isElsesItem(booking, ownerId);
@@ -73,15 +71,21 @@ public class BookingService {
     }
 
     public BookingDto get(int bookingId, int userId) {
-        BookingIdValidator.validate(getBookingsId(), bookingId);
-        UserIdValidator.validate(userService.getUsersId(), userId);
+        UserIdValidator.validate(userService.get(userId));
         Booking booking = bookingJpaRepository.findById(bookingId);
+        BookingIdValidator.validate(booking);
         BookingValidator.isElsesBooking(booking, userId);
         return BookingMapper.convertToDto(booking);
     }
 
-    public List<BookingDto> getAllOfBookerId(int bookerId, String state, Integer from, Integer size) {
-        UserIdValidator.validate(userService.getUsersId(), bookerId);
+    public Booking getBooking(int bookingId) {
+        Booking booking = bookingJpaRepository.findById(bookingId);
+        BookingIdValidator.validate(booking);
+        return booking;
+    }
+
+    public List<BookingDto> getAllByBookerId(int bookerId, String state, Integer from, Integer size) {
+        UserIdValidator.validate(userService.get(bookerId));
         List<BookingDto> bookings = bookingJpaRepository
                 .findAllByBooker_IdOrderByStartDesc(bookerId, PageableMaker.makePage(from, size))
                 .stream()
@@ -90,8 +94,8 @@ public class BookingService {
         return getBookings(state, bookings);
     }
 
-    public List<BookingDto> getAllOfOwnerId(int ownerId, String state, Integer from, Integer size) {
-        UserIdValidator.validate(userService.getUsersId(), ownerId);
+    public List<BookingDto> getAllByOwnerId(int ownerId, String state, Integer from, Integer size) {
+        UserIdValidator.validate(userService.get(ownerId));
         List<BookingDto> bookings = bookingJpaRepository
                 .findAllByItem_Owner_IdOrderByStartDesc(ownerId, PageableMaker.makePage(from, size))
                 .stream()
@@ -128,9 +132,5 @@ public class BookingService {
             default:
                 throw new IncorrectBookingStatus("Некорректный статус бронирования");
         }
-    }
-
-    public List<Integer> getBookingsId() {
-        return bookingJpaRepository.findAll().stream().map(Booking::getId).collect(Collectors.toList());
     }
 }

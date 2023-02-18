@@ -27,14 +27,14 @@ public class UserService {
         try {
             return UserMapper.convert(userJpaRepository.save(user));
         } catch (DataIntegrityViolationException e) {
-            throw new Duplicate("Вещь с указанными данными уже существует.");
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
         }
     }
 
     public UserDto update(int userId, UserDto userDto) {
         UserValidator.validate(userDto);
-        UserIdValidator.validate(getUsersId(), userId);
-        User user = userJpaRepository.findById(userId);
+        UserIdValidator.validate(get(userId));
+        User user = getUser(userId);
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
@@ -42,36 +42,31 @@ public class UserService {
             user.setEmail(userDto.getEmail());
         }
         try {
-            user = userJpaRepository.save(user);
-            return UserMapper.convert(user);
+            return UserMapper.convert(userJpaRepository.save(user));
         } catch (DataIntegrityViolationException e) {
-            throw new Duplicate("Вещь с указанными данными уже существует.");
+            throw new Duplicate("Пользователь с указанными данными уже существует.");
         }
     }
 
     public UserDto delete(int userId) {
-        UserIdValidator.validate(getUsersId(), userId);
+        UserIdValidator.validate(get(userId));
         User user = getUser(userId);
         userJpaRepository.delete(user);
         return UserMapper.convert(user);
     }
 
     public UserDto get(int userId) {
-        UserIdValidator.validate(getUsersId(), userId);
         User user = userJpaRepository.findById(userId);
+        UserIdValidator.validate(user);
         return UserMapper.convert(user);
     }
 
     public User getUser(int userId) {
-        UserIdValidator.validate(getUsersId(), userId);
+        UserIdValidator.validate(get(userId));
         return userJpaRepository.findById(userId);
     }
 
     public List<UserDto> getAll() {
         return userJpaRepository.findAll().stream().map(UserMapper::convert).collect(Collectors.toList());
-    }
-
-    public List<Integer> getUsersId() {
-        return userJpaRepository.findAll().stream().map(User::getId).collect(Collectors.toList());
     }
 }
