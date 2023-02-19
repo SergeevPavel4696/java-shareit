@@ -2,9 +2,6 @@ package ru.practicum.shareit.request;
 
 import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.model.ItemDto;
-import ru.practicum.shareit.item.validator.ItemValidator;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.ItemRequestDto;
 import ru.practicum.shareit.request.validator.ItemRequestValidator;
