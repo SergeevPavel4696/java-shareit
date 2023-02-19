@@ -5,9 +5,7 @@ import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.validator.CommentValidator;
-import ru.practicum.shareit.item.validator.ItemValidator;
 import ru.practicum.shareit.user.model.User;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
