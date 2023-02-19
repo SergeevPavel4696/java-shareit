@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.validator;
 
-import ru.practicum.shareit.exceptions.ServerError;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemDto;
