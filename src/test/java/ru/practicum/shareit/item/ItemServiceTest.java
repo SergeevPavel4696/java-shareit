@@ -68,7 +68,7 @@ public class ItemServiceTest {
         ownerDto = UserMapper.convert(owner);
         author = new User(1, "Автор", "author@mail.ya");
         authorDto = UserMapper.convert(author);
-        item = new Item(1, "Название", "Описание", true, owner, null);
+        item = Item.builder().id(1).name("Название").description("Описание").available(true).owner(owner).requestId(null).build();
         itemDto = ItemMapper.convert(item);
         updateItem = new Item(1, "Обновлённое название", "Обновлённое описание", true, owner, null);
         updateItemDto = ItemMapper.convert(updateItem);

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 import ru.practicum.shareit.exceptions.Duplicate;
 import ru.practicum.shareit.exceptions.IncorrectId;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -60,7 +61,7 @@ public class UserServiceTest {
 
     @Test
     public void createWithDuplicateEmailTest() {
-        when(userJpaRepository.save(any())).thenThrow(new Duplicate("Пользователь с таким email уже существует."));
+        when(userJpaRepository.save(any())).thenThrow(new DataIntegrityViolationException("Пользователь с указанными данными уже существует."));
         assertThrows(Duplicate.class, () -> userService.create(userDto1));
     }
 
@@ -86,7 +87,7 @@ public class UserServiceTest {
         when(userJpaRepository.save(any())).thenReturn(user1);
         userService.create(userDto1);
         when(userJpaRepository.findById(Mockito.anyInt())).thenReturn(user1);
-        when(userJpaRepository.save(any())).thenThrow(new Duplicate("Пользователь с таким email уже существует."));
+        when(userJpaRepository.save(any())).thenThrow(new DataIntegrityViolationException("Пользователь с указанными данными уже существует."));
         userDto1update.setEmail("1@mail.ya");
         assertThrows(Duplicate.class, () -> userService.update(1, userDto1update));
     }

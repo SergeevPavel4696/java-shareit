@@ -50,7 +50,7 @@ public class BookingServiceTest {
     private User owner;
     private UserDto ownerDto;
     private Item item;
-    private Booking booking;
+    private Booking booking1;
     private final IncorrectId notFoundException = new IncorrectId("Объект не найден");
 
     @BeforeEach
@@ -64,67 +64,67 @@ public class BookingServiceTest {
         item = new Item(1, "Название", "Описание", true, owner, 1);
         LocalDateTime start = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
         LocalDateTime end = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
-        booking = new Booking(1, start, end, item, booker, APPROVED);
+        booking1 = new Booking(1, start, end, item, booker, APPROVED);
     }
 
     @Test
     public void createTest() {
         when(userService.get(anyInt())).thenReturn(ownerDto);
         when(itemService.getItem(anyInt())).thenReturn(item);
-        when(bookingJpaRepository.save(any())).thenReturn(booking);
-        BookingDto bookingDto = bookingService.create(BookingMapper.convert(booking), 1);
-        assertEquals(booking.getId(), bookingDto.getId());
-        assertEquals(booking.getStart(), bookingDto.getStart());
-        assertEquals(booking.getEnd(), bookingDto.getEnd());
-        assertEquals(booking.getItem(), bookingDto.getItem());
-        assertEquals(booking.getBooker(), bookingDto.getBooker());
-        assertEquals(booking.getStatus(), bookingDto.getStatus());
+        when(bookingJpaRepository.save(any())).thenReturn(booking1);
+        BookingDto bookingDto = bookingService.create(BookingMapper.convert(booking1), 1);
+        assertEquals(booking1.getId(), bookingDto.getId());
+        assertEquals(booking1.getStart(), bookingDto.getStart());
+        assertEquals(booking1.getEnd(), bookingDto.getEnd());
+        assertEquals(booking1.getItem(), bookingDto.getItem());
+        assertEquals(booking1.getBooker(), bookingDto.getBooker());
+        assertEquals(booking1.getStatus(), bookingDto.getStatus());
     }
 
     @Test
     public void createUnavailableItemTest() {
         item.setAvailable(false);
         when(itemService.getItem(anyInt())).thenReturn(item);
-        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking), 1));
+        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking1), 1));
     }
 
     @Test
     public void createSelfBookingTest() {
         when(itemService.getItem(anyInt())).thenReturn(item);
-        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking), 2));
+        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking1), 2));
     }
 
     @Test
     public void createEndIsBeforeStartTest() {
-        booking.setEnd(booking.getStart().minusDays(1));
+        booking1.setEnd(booking1.getStart().minusDays(1));
         when(itemService.getItem(anyInt())).thenReturn(item);
-        assertThrows(ValidationException.class, () -> bookingService.create(BookingMapper.convert(booking), 1));
+        assertThrows(ValidationException.class, () -> bookingService.create(BookingMapper.convert(booking1), 1));
     }
 
     @Test
     public void createNotFoundTest() {
         when(itemService.getItem(anyInt())).thenThrow(notFoundException);
-        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking), 1));
+        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking1), 1));
     }
 
     @Test
     public void createUserNotFoundTest() {
         when(userService.get(anyInt())).thenThrow(notFoundException);
         when(itemService.getItem(anyInt())).thenReturn(item);
-        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking), 10));
+        assertThrows(IncorrectId.class, () -> bookingService.create(BookingMapper.convert(booking1), 10));
     }
 
     @Test
     public void updateTest() {
         when(userService.get(anyInt())).thenReturn(userDto);
-        when(bookingJpaRepository.findById(1)).thenReturn(booking);
+        when(bookingJpaRepository.findById(1)).thenReturn(booking1);
         BookingDto updatedBooking = bookingService.reactToBooking(1, false, owner.getId());
         assertEquals(updatedBooking.getStatus(), APPROVED);
     }
 
     @Test
     public void updateNotFoundTest() {
-        when(bookingJpaRepository.findById(1)).thenReturn(booking);
+        when(bookingJpaRepository.findById(1)).thenReturn(booking1);
         assertThrows(IncorrectId.class, () -> bookingService.reactToBooking(1, false, owner.getId()));
     }
 
@@ -137,14 +137,14 @@ public class BookingServiceTest {
     @Test
     public void updateAlreadyApprovedTest() {
         when(userService.get(anyInt())).thenReturn(userDto);
-        when(bookingJpaRepository.findById(anyInt())).thenReturn(booking);
+        when(bookingJpaRepository.findById(anyInt())).thenReturn(booking1);
         assertThrows(ValidationException.class, () -> bookingService.reactToBooking(1, true, 2));
     }
 
     @Test
     public void getTest() {
         when(userService.get(anyInt())).thenReturn(userDto);
-        when(bookingJpaRepository.findById(anyInt())).thenReturn(booking);
+        when(bookingJpaRepository.findById(anyInt())).thenReturn(booking1);
         when(itemService.getItem(anyInt())).thenReturn(item);
         assertEquals(1, bookingService.getBooking(1).getId());
     }
@@ -184,5 +184,10 @@ public class BookingServiceTest {
     public void getAllBookingsByOwnerIdUnsupportedStateTestFail() {
         when(userService.get(anyInt())).thenReturn(userDto);
         assertThrows(IncorrectBookingStatus.class, () -> bookingService.getAllByOwnerId(2, "UNSUPPORTED", 0, 10));
+    }
+
+    @Test
+    public void getBookings() {
+
     }
 }

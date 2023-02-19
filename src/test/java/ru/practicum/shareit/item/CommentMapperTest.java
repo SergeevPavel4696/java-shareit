@@ -26,7 +26,7 @@ public class CommentMapperTest {
     private final int commentId = 4;
     private final String text = "Комментарий";
     private final Comment comment = new Comment(commentId, text, item, author);
-    private final CommentDto commentDto = new CommentDto(commentId, text, itemId, authorName);
+    private final CommentDto commentDto = CommentDto.builder().id(commentId).text(text).itemId(itemId).authorName(authorName).build();
 
     @Test
     public void commentToCommentDtoTest() {
