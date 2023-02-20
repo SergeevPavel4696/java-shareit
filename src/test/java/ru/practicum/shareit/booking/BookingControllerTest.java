@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -87,6 +88,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @DisplayName("test for validation method")
     public void validationTest() throws Exception {
         when(bookingService.create(any(), anyInt())).thenReturn(bookingDto);
         mockMvc.perform(post("/bookings")

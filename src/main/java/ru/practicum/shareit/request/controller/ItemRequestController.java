@@ -14,6 +14,7 @@ import ru.practicum.shareit.request.model.ItemRequestDtoResponse;
 import ru.practicum.shareit.request.model.ItemRequestDtoWithItems;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -39,8 +40,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestDtoWithItems> getAllRequests(
             @RequestHeader("X-Sharer-User-Id") Integer myId,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return itemRequestService.getAllByOtherRequester(myId, from, size);
     }
 

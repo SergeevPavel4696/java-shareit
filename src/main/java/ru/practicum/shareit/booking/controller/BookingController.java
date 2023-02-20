@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.model.BookingDto;
 import ru.practicum.shareit.booking.model.BookingEntry;
 import ru.practicum.shareit.booking.service.BookingService;
 
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -49,8 +50,8 @@ public class BookingController {
     public List<BookingDto> getAllBookingsOfBooker(
             @RequestHeader("X-Sharer-User-Id") Integer bookerId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return bookingService.getAllByBookerId(bookerId, state, from, size);
     }
 
@@ -58,8 +59,8 @@ public class BookingController {
     public List<BookingDto> getAllBookingsOfOwner(
             @RequestHeader("X-Sharer-User-Id") Integer ownerId,
             @RequestParam(required = false, defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return bookingService.getAllByOwnerId(ownerId, state, from, size);
     }
 }

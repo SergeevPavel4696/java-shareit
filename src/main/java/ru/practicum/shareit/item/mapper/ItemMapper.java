@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.mapper;
 
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.BookingEntry;
 import ru.practicum.shareit.item.model.CommentDto;
 import ru.practicum.shareit.item.model.Item;
@@ -9,7 +10,10 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
-public class ItemMapper {
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
+public final class ItemMapper {
     public static ItemDto convert(Item item) {
         return new ItemDto(item.getId(), item.getName(), item.getDescription(),
                 item.getAvailable(), item.getRequestId());

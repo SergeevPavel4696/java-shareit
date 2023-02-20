@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.item.model.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -49,16 +50,16 @@ public class ItemController {
     @GetMapping
     public List<ItemDtoWithBooking> getAllItems(
             @RequestHeader(value = "X-Sharer-User-Id", required = false) Integer ownerId,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return itemService.getAllByOwnerId(ownerId, from, size);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getWantedItems(
             @RequestParam(name = "text") String text,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @PositiveOrZero @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return itemService.searchItemsByText(text, from, size);
     }
 

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.mapper;
 
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.ItemDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.ItemRequestDto;
@@ -10,7 +11,10 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ItemRequestMapper {
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
+public final class ItemRequestMapper {
     public static ItemRequestDto convert(ItemRequest itemRequest) {
         return new ItemRequestDto(itemRequest.getId(), itemRequest.getDescription());
     }
